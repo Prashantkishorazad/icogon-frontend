@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICOGON - Admin Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #ff6b35;
+            --accent: #4ecdc4;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #f8f9fa;
+            --white: #ffffff;
+            --text: #1a1a2e;
+            --border: #e5e7eb;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .admin-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary), #2a2a4e);
+            color: white;
+            padding: 2rem 0;
+            position: fixed;
+            width: 250px;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-logo {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 1.5rem;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu li a:hover,
+        .sidebar-menu li a.active {
+            background: rgba(255,107,53,0.2);
+            color: white;
+            border-left-color: var(--secondary);
+        }
+
+        /* MAIN */
+        .main {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+        }
+
+        .logout-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* KPI CARDS */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--secondary);
+        }
+
+        .kpi-card.success { border-left-color: var(--success); }
+        .kpi-card.warning { border-left-color: var(--warning); }
+        .kpi-card.danger { border-left-color: var(--danger); }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-label {
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .kpi-change {
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .kpi-change.up { color: var(--success); }
+        .kpi-change.down { color: var(--danger); }
+
+        /* CHARTS */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* TABLES */
+        .table-card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .table-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--bg);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover {
+            background: rgba(255,107,53,0.05);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-active { background: rgba(16,185,129,0.2); color: var(--success); }
+        .status-pending { background: rgba(245,158,11,0.2); color: var(--warning); }
+        .status-completed { background: rgba(16,185,129,0.2); color: var(--success); }
+
+        .action-btn {
+            background: none;
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 0.5rem;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-cube"></i> ICOGON
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="#" class="active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                <li><a href="#"><i class="fas fa-users"></i> Clients</a></li>
+                <li><a href="#"><i class="fas fa-tasks"></i> Projects</a></li>
+                <li><a href="#"><i class="fas fa-envelope"></i> Leads</a></li>
+                <li><a href="#"><i class="fas fa-credit-card"></i> Payments</a></li>
+                <li><a href="#"><i class="fas fa-file-invoice"></i> Invoices</a></li>
+                <li><a href="#"><i class="fas fa-chart-pie"></i> Analytics</a></li>
+                <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+            </ul>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main">
+            <!-- HEADER -->
+            <div class="header">
+                <h1>Admin Dashboard</h1>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+
+            <!-- KPI CARDS -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-value">15,420</div>
+                    <div class="kpi-label">Total Visitors</div>
+                    <div class="kpi-change up"><i class="fas fa-arrow-up"></i> 12.5% from last month</div>
+                </div>
+                <div class="kpi-card success">
+                    <div class="kpi-value">342</div>
+                    <div class="kpi-label">Total Leads</div>
+                    <div class="kpi-change up"><i class="fas fa-arrow-up"></i> 8.2% from last month</div>
+                </div>
+                <div class="kpi-card warning">
+                    <div class="kpi-value">₹12.5L</div>
+                    <div class="kpi-label">Total Revenue</div>
+                    <div class="kpi-change up"><i class="fas fa-arrow-up"></i> 15.3% from last month</div>
+                </div>
+                <div class="kpi-card danger">
+                    <div class="kpi-value">2.22%</div>
+                    <div class="kpi-label">Conversion Rate</div>
+                    <div class="kpi-change down"><i class="fas fa-arrow-down"></i> 0.5% from last month</div>
+                </div>
+            </div>
+
+            <!-- CHARTS -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-title">Weekly Visitors</div>
+                    <div class="chart-container">
+                        <canvas id="visitorsChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Traffic Source</div>
+                    <div class="chart-container">
+                        <canvas id="trafficChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RECENT LEADS -->
+            <div class="table-card">
+                <div class="table-title">Recent Leads</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Service</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>John Doe</td>
+                            <td>john@example.com</td>
+                            <td>Website Development</td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                            <td>Today</td>
+                            <td>
+                                <button class="action-btn">View</button>
+                                <button class="action-btn">Reply</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Jane Smith</td>
+                            <td>jane@example.com</td>
+                            <td>Mobile App</td>
+                            <td><span class="status-badge status-active">Contacted</span></td>
+                            <td>Yesterday</td>
+                            <td>
+                                <button class="action-btn">View</button>
+                                <button class="action-btn">Reply</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Mike Johnson</td>
+                            <td>mike@example.com</td>
+                            <td>AI/ML Solutions</td>
+                            <td><span class="status-badge status-completed">Qualified</span></td>
+                            <td>2 days ago</td>
+                            <td>
+                                <button class="action-btn">View</button>
+                                <button class="action-btn">Reply</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- TOP SERVICES -->
+            <div class="table-card">
+                <div class="table-title">Top Services</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Service</th>
+                            <th>Total Leads</th>
+                            <th>Conversions</th>
+                            <th>Revenue</th>
+                            <th>Growth</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Website Development</td>
+                            <td>120</td>
+                            <td>24</td>
+                            <td>₹4.5L</td>
+                            <td><span class="kpi-change up"><i class="fas fa-arrow-up"></i> 18%</span></td>
+                        </tr>
+                        <tr>
+                            <td>Mobile App Development</td>
+                            <td>85</td>
+                            <td>17</td>
+                            <td>₹3.8L</td>
+                            <td><span class="kpi-change up"><i class="fas fa-arrow-up"></i> 12%</span></td>
+                        </tr>
+                        <tr>
+                            <td>AI/ML Solutions</td>
+                            <td>67</td>
+                            <td>9</td>
+                            <td>₹2.5L</td>
+                            <td><span class="kpi-change down"><i class="fas fa-arrow-down"></i> 5%</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Visitors Chart
+        const visitorsCtx = document.getElementById('visitorsChart').getContext('2d');
+        new Chart(visitorsCtx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Visitors',
+                    data: [2100, 2400, 1800, 2900, 3200, 2100, 1820],
+                    borderColor: '#ff6b35',
+                    backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Traffic Chart
+        const trafficCtx = document.getElementById('trafficChart').getContext('2d');
+        new Chart(trafficCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Direct', 'Google', 'Social', 'Referral'],
+                datasets: [{
+                    data: [32, 39, 16, 13],
+                    backgroundColor: [
+                        '#ff6b35',
+                        '#4ecdc4',
+                        '#10b981',
+                        '#f59e0b'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.href = '../login.html';
+        }
+    </script>
+</body>
+</html>

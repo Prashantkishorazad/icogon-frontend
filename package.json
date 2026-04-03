@@ -1,0 +1,23 @@
+{
+  "name": "icogon-frontend",
+  "version": "1.0.0",
+  "description": "ICOGON - Modern IT Company Website",
+  "main": "index.html",
+  "scripts": {
+    "dev": "http-server -p 8000 -c-1",
+    "build": "echo 'Frontend is static, no build needed'",
+    "start": "npx http-server"
+  },
+  "keywords": [
+    "icogon",
+    "website",
+    "frontend",
+    "responsive",
+    "modern"
+  ],
+  "author": "ICOGON PVT LTD",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

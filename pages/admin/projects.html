@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects Management | ICOGON Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f1419;
+            color: #e0e0e0;
+        }
+
+        .container-wrapper {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: #1a1f2e;
+            border-right: 1px solid #2a3f4f;
+            padding: 20px 0;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 30px;
+            border-bottom: 1px solid #2a3f4f;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: #ff6b35;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            margin: 5px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #a0a0a0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-item:hover {
+            background: #2a3f4f;
+            color: #ff6b35;
+        }
+
+        .nav-item.active {
+            background: #ff6b35;
+            color: white;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #1a1f2e;
+            border-bottom: 1px solid #2a3f4f;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            background: #2a3f4f;
+            border: 1px solid #3a5f6f;
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        .search-box input::placeholder {
+            color: #7a8a9a;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7a8a9a;
+        }
+
+        .filter-select {
+            padding: 12px 15px;
+            background: #2a3f4f;
+            border: 1px solid #3a5f6f;
+            border-radius: 8px;
+            color: #e0e0e0;
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        .btn-primary {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 53, 0.3);
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .project-card {
+            background: #2a3f4f;
+            border: 1px solid #3a5f6f;
+            border-radius: 10px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            border-color: #ff6b35;
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.2);
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .project-title {
+            font-size: 18px;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            color: #e0e0e0;
+        }
+
+        .project-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #3a5f6f;
+            color: #4ecdc4;
+        }
+
+        .project-badge.in-progress {
+            background: #5a7f6f;
+            color: #7ecdc4;
+        }
+
+        .project-badge.completed {
+            background: #4a7f4f;
+            color: #7eda7f;
+        }
+
+        .project-badge.on-hold {
+            background: #7f6f4a;
+            color: #daca7f;
+        }
+
+        .project-client {
+            font-size: 13px;
+            color: #a0a0a0;
+            margin-bottom: 15px;
+        }
+
+        .project-service {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #1a2f3f;
+            color: #ff6b35;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+
+        .progress-container {
+            margin-bottom: 15px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #a0a0a0;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #1a2f3f;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b35 0%, #ff8c42 100%);
+            transition: width 0.3s ease;
+        }
+
+        .project-budget {
+            font-size: 13px;
+            color: #a0a0a0;
+            margin-bottom: 15px;
+        }
+
+        .project-budget strong {
+            color: #e0e0e0;
+            font-size: 16px;
+        }
+
+        .project-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+        }
+
+        .btn-small {
+            flex: 1;
+            padding: 8px 12px;
+            background: transparent;
+            border: 1px solid #3a5f6f;
+            border-radius: 6px;
+            color: #a0a0a0;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn-small:hover {
+            border-color: #ff6b35;
+            color: #ff6b35;
+        }
+
+        .no-projects {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: #a0a0a0;
+        }
+
+        .no-projects i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-content {
+                margin-left: 200px;
+            }
+
+            .header {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-wrapper">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo"><i class="fas fa-rocket"></i> ICOGON</div>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>CRM - Leads</span>
+            </div>
+            <div class="nav-item active">
+                <i class="fas fa-briefcase"></i>
+                <span>Projects</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-user-friends"></i>
+                <span>Users</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-credit-card"></i>
+                <span>Payments</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-file-export"></i>
+                <span>Reports</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-title">
+                    <i class="fas fa-briefcase"></i> Project Management
+                </div>
+                <div class="user-info">
+                    <span>Admin User</span>
+                    <div class="user-avatar">AU</div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="content">
+                <!-- Controls -->
+                <div class="controls">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search projects...">
+                    </div>
+                    <select class="filter-select">
+                        <option value="">All Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                        <option value="On Hold">On Hold</option>
+                    </select>
+                    <select class="filter-select">
+                        <option value="">All Services</option>
+                        <option value="Website">Website</option>
+                        <option value="Mobile App">Mobile App</option>
+                        <option value="AI/ML">AI/ML</option>
+                        <option value="E-commerce">E-commerce</option>
+                        <option value="UI/UX">UI/UX</option>
+                        <option value="SEO">SEO</option>
+                    </select>
+                    <button class="btn-primary">
+                        <i class="fas fa-plus"></i> New Project
+                    </button>
+                </div>
+
+                <!-- Projects Grid -->
+                <div class="projects-grid">
+                    <div class="project-card">
+                        <div class="project-header">
+                            <div class="project-title">E-Commerce Platform</div>
+                            <div class="project-badge in-progress">In Progress</div>
+                        </div>
+                        <div class="project-client">Client: TechCorp Inc</div>
+                        <div class="project-service">Website Development</div>
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Progress</span>
+                                <span>65%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 65%;"></div>
+                            </div>
+                        </div>
+                        <div class="project-budget">Budget: <strong>₹2,50,000</strong></div>
+                        <div class="project-actions">
+                            <button class="btn-small">Edit</button>
+                            <button class="btn-small">View</button>
+                            <button class="btn-small">Delete</button>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <div class="project-title">Mobile Banking App</div>
+                            <div class="project-badge completed">Completed</div>
+                        </div>
+                        <div class="project-client">Client: FinanceHub</div>
+                        <div class="project-service">Mobile App</div>
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Progress</span>
+                                <span>100%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 100%;"></div>
+                            </div>
+                        </div>
+                        <div class="project-budget">Budget: <strong>₹4,50,000</strong></div>
+                        <div class="project-actions">
+                            <button class="btn-small">Edit</button>
+                            <button class="btn-small">View</button>
+                            <button class="btn-small">Delete</button>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <div class="project-title">AI Analytics Dashboard</div>
+                            <div class="project-badge in-progress">In Progress</div>
+                        </div>
+                        <div class="project-client">Client: DataCorp</div>
+                        <div class="project-service">AI/ML</div>
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Progress</span>
+                                <span>45%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 45%;"></div>
+                            </div>
+                        </div>
+                        <div class="project-budget">Budget: <strong>₹3,75,000</strong></div>
+                        <div class="project-actions">
+                            <button class="btn-small">Edit</button>
+                            <button class="btn-small">View</button>
+                            <button class="btn-small">Delete</button>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <div class="project-title">Brand Redesign</div>
+                            <div class="project-badge on-hold">On Hold</div>
+                        </div>
+                        <div class="project-client">Client: BrandFlow</div>
+                        <div class="project-service">UI/UX</div>
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Progress</span>
+                                <span>30%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 30%;"></div>
+                            </div>
+                        </div>
+                        <div class="project-budget">Budget: <strong>₹1,50,000</strong></div>
+                        <div class="project-actions">
+                            <button class="btn-small">Edit</button>
+                            <button class="btn-small">View</button>
+                            <button class="btn-small">Delete</button>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <div class="project-title">SEO Optimization</div>
+                            <div class="project-badge completed">Completed</div>
+                        </div>
+                        <div class="project-client">Client: MarketingPro</div>
+                        <div class="project-service">SEO</div>
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Progress</span>
+                                <span>100%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 100%;"></div>
+                            </div>
+                        </div>
+                        <div class="project-budget">Budget: <strong>₹75,000</strong></div>
+                        <div class="project-actions">
+                            <button class="btn-small">Edit</button>
+                            <button class="btn-small">View</button>
+                            <button class="btn-small">Delete</button>
+                        </div>
+                    </div>
+
+                    <div class="project-card">
+                        <div class="project-header">
+                            <div class="project-title">Cloud Migration</div>
+                            <div class="project-badge in-progress">In Progress</div>
+                        </div>
+                        <div class="project-client">Client: CloudTech</div>
+                        <div class="project-service">Backend Development</div>
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Progress</span>
+                                <span>80%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 80%;"></div>
+                            </div>
+                        </div>
+                        <div class="project-budget">Budget: <strong>₹3,00,000</strong></div>
+                        <div class="project-actions">
+                            <button class="btn-small">Edit</button>
+                            <button class="btn-small">View</button>
+                            <button class="btn-small">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Filter functionality
+        document.querySelectorAll('.filter-select').forEach(select => {
+            select.addEventListener('change', function() {
+                console.log('Filter updated:', this.value);
+            });
+        });
+
+        // Search functionality
+        document.querySelector('.search-box input').addEventListener('keyup', function() {
+            console.log('Search:', this.value);
+        });
+    </script>
+</body>
+</html>

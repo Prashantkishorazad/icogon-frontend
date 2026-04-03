@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICOGON - Pricing & Payment</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #ff6b35;
+            --accent: #4ecdc4;
+            --bg: #f8f9fa;
+            --white: #ffffff;
+            --text: #1a1a2e;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 2rem 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .pricing-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .pricing-card.featured {
+            border: 2px solid var(--secondary);
+            transform: scale(1.05);
+        }
+
+        .badge {
+            position: absolute;
+            top: -15px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--secondary), #ff8c42);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .pricing-header h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .pricing-header p {
+            color: #999;
+            margin-bottom: 1rem;
+        }
+
+        .price {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--secondary);
+            margin: 1.5rem 0;
+        }
+
+        .price span {
+            font-size: 1rem;
+            color: #999;
+            font-weight: 400;
+        }
+
+        .features {
+            list-style: none;
+            margin: 1.5rem 0;
+        }
+
+        .features li {
+            padding: 0.75rem 0;
+            padding-left: 28px;
+            position: relative;
+            color: #666;
+        }
+
+        .features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--secondary);
+            font-weight: bold;
+        }
+
+        .cta-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--secondary), #ff8c42);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255,107,53,0.3);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .payment-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .payment-btn:hover {
+            background: #ff5722;
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .success-icon {
+            font-size: 3rem;
+            color: #10b981;
+            margin-bottom: 1rem;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--secondary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Choose Your Plan</h1>
+
+        <div class="pricing-grid">
+            <!-- Basic Plan -->
+            <div class="pricing-card">
+                <h3 class="pricing-header">
+                    <h3>Basic</h3>
+                    <p>For Startups</p>
+                </h3>
+                <div class="price">₹15,000<span>/month</span></div>
+                <ul class="features">
+                    <li>Website Development</li>
+                    <li>Mobile Responsive</li>
+                    <li>Basic SEO</li>
+                    <li>3 Months Support</li>
+                    <li>Email Support</li>
+                </ul>
+                <button class="cta-btn" onclick="selectPlan('basic', 15000)">Get Started</button>
+            </div>
+
+            <!-- Standard Plan -->
+            <div class="pricing-card featured">
+                <div class="badge">Popular</div>
+                <h3 class="pricing-header">
+                    <h3>Standard</h3>
+                    <p>Best for Growing Businesses</p>
+                </h3>
+                <div class="price">₹35,000<span>/month</span></div>
+                <ul class="features">
+                    <li>Website + Mobile App</li>
+                    <li>Full SEO Optimization</li>
+                    <li>AI Chatbot</li>
+                    <li>6 Months Support</li>
+                    <li>Priority Support</li>
+                    <li>Analytics Dashboard</li>
+                </ul>
+                <button class="cta-btn" onclick="selectPlan('standard', 35000)">Get Started</button>
+            </div>
+
+            <!-- Premium Plan -->
+            <div class="pricing-card">
+                <h3 class="pricing-header">
+                    <h3>Premium</h3>
+                    <p>For Enterprises</p>
+                </h3>
+                <div class="price">₹75,000<span>/month</span></div>
+                <ul class="features">
+                    <li>Everything in Standard</li>
+                    <li>Custom AI/ML Solutions</li>
+                    <li>E-commerce Integration</li>
+                    <li>Lifetime Support</li>
+                    <li>24/7 Premium Support</li>
+                    <li>API Integration</li>
+                    <li>Dedicated Account Manager</li>
+                </ul>
+                <button class="cta-btn" onclick="selectPlan('premium', 75000)">Get Started</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="planTitle">Complete Payment</h2>
+                <button onclick="closeModal()"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 1rem;">Processing your payment...</p>
+            </div>
+
+            <div class="success-message" id="successMessage">
+                <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+                <h3>Payment Successful!</h3>
+                <p>Thank you for your purchase. We'll contact you shortly.</p>
+                <button class="payment-btn" onclick="location.href='/'">Back to Home</button>
+            </div>
+
+            <form id="paymentForm" class="payment-form">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" placeholder="Your name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" placeholder="+91 98765 43210" required>
+                </div>
+                <div class="form-group">
+                    <label>Company Name</label>
+                    <input type="text" placeholder="Your company" required>
+                </div>
+                <button type="button" class="payment-btn" onclick="processPayment()">Pay with Razorpay</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let selectedPlan = null;
+        let selectedAmount = null;
+
+        function selectPlan(plan, amount) {
+            selectedPlan = plan;
+            selectedAmount = amount;
+            document.getElementById('planTitle').textContent = `Complete ${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan Payment`;
+            document.getElementById('paymentModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('paymentModal').classList.remove('active');
+            document.getElementById('paymentForm').style.display = 'block';
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        async function processPayment() {
+            const form = document.getElementById('paymentForm');
+            const name = form[0].value;
+            const email = form[1].value;
+            const phone = form[2].value;
+            const company = form[3].value;
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('paymentForm').style.display = 'none';
+
+            try {
+                // Create order on backend
+                const response = await fetch('http://localhost:5000/api/payments/create-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount: selectedAmount,
+                        planId: selectedPlan,
+                        userId: localStorage.getItem('userId') || 'guest',
+                        description: `${selectedPlan} Plan - ${company}`
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Open Razorpay checkout
+                    const options = {
+                        key: data.razorpayKey,
+                        amount: data.amount,
+                        currency: data.currency,
+                        order_id: data.orderId,
+                        name: 'ICOGON',
+                        description: `${selectedPlan} Plan Payment`,
+                        prefill: {
+                            name: name,
+                            email: email,
+                            contact: phone
+                        },
+                        handler: async function (response) {
+                            // Verify payment
+                            await verifyPayment(response);
+                        },
+                        theme: {
+                            color: '#ff6b35'
+                        }
+                    };
+
+                    const rzp = new Razorpay(options);
+                    rzp.open();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Payment initiation failed');
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('paymentForm').style.display = 'block';
+            }
+        }
+
+        async function verifyPayment(response) {
+            try {
+                const verifyResponse = await fetch('http://localhost:5000/api/payments/verify-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        razorpayOrderId: response.razorpay_order_id,
+                        razorpayPaymentId: response.razorpay_payment_id,
+                        razorpaySignature: response.razorpay_signature,
+                        userId: localStorage.getItem('userId') || 'guest'
+                    })
+                });
+
+                const data = await verifyResponse.json();
+
+                if (data.success) {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('successMessage').style.display = 'block';
+                    console.log('Payment successful:', data);
+                } else {
+                    throw new Error('Payment verification failed');
+                }
+            } catch (error) {
+                console.error('Verification error:', error);
+                alert('Payment verification failed');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payments Management | ICOGON Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f1419;
+            color: #e0e0e0;
+        }
+
+        .container-wrapper {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: #1a1f2e;
+            border-right: 1px solid #2a3f4f;
+            padding: 20px 0;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 30px;
+            border-bottom: 1px solid #2a3f4f;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: #ff6b35;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            margin: 5px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #a0a0a0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-item:hover {
+            background: #2a3f4f;
+            color: #ff6b35;
+        }
+
+        .nav-item.active {
+            background: #ff6b35;
+            color: white;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #1a1f2e;
+            border-bottom: 1px solid #2a3f4f;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: linear-gradient(135deg, #2a3f4f 0%, #1a2f3f 100%);
+            border: 1px solid #3a5f6f;
+            border-radius: 10px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            border-color: #ff6b35;
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            color: #a0a0a0;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #ff6b35;
+            font-family: 'Poppins', sans-serif;
+            margin-bottom: 10px;
+        }
+
+        .kpi-change {
+            font-size: 12px;
+            color: #7eda7f;
+        }
+
+        .kpi-change.negative {
+            color: #da6f6f;
+        }
+
+        .charts-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: #2a3f4f;
+            border: 1px solid #3a5f6f;
+            border-radius: 10px;
+            padding: 25px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .transactions-card {
+            background: #2a3f4f;
+            border: 1px solid #3a5f6f;
+            border-radius: 10px;
+            padding: 25px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #1a2f3f;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #a0a0a0;
+            font-size: 12px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #3a5f6f;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #3a5f6f;
+        }
+
+        tr:hover {
+            background: #3a4f5f;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-completed {
+            background: #4a7f4f;
+            color: #7eda7f;
+        }
+
+        .status-pending {
+            background: #4a5f7f;
+            color: #6ecdc4;
+        }
+
+        .status-failed {
+            background: #7f4a4f;
+            color: #da6f6f;
+        }
+
+        .status-refunded {
+            background: #6f5a4f;
+            color: #d9a86f;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            background: #2a3f4f;
+            border: 1px solid #3a5f6f;
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7a8a9a;
+        }
+
+        .filter-select {
+            padding: 12px 15px;
+            background: #2a3f4f;
+            border: 1px solid #3a5f6f;
+            border-radius: 8px;
+            color: #e0e0e0;
+            cursor: pointer;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            background: transparent;
+            border: 1px solid #3a5f6f;
+            border-radius: 6px;
+            color: #a0a0a0;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-small:hover {
+            border-color: #ff6b35;
+            color: #ff6b35;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-content {
+                margin-left: 200px;
+            }
+
+            .header {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-wrapper">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo"><i class="fas fa-rocket"></i> ICOGON</div>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>CRM - Leads</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-briefcase"></i>
+                <span>Projects</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-user-friends"></i>
+                <span>Users</span>
+            </div>
+            <div class="nav-item active">
+                <i class="fas fa-credit-card"></i>
+                <span>Payments</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-file-export"></i>
+                <span>Reports</span>
+            </div>
+            <div class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-title">
+                    <i class="fas fa-credit-card"></i> Payment Management
+                </div>
+                <div class="user-info">
+                    <span>Admin User</span>
+                    <div class="user-avatar">AU</div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="content">
+                <!-- KPI Cards -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Revenue</div>
+                        <div class="kpi-value">₹12.5L</div>
+                        <div class="kpi-change"><i class="fas fa-arrow-up"></i> +12% vs last month</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Total Transactions</div>
+                        <div class="kpi-value">342</div>
+                        <div class="kpi-change"><i class="fas fa-arrow-up"></i> +25 vs last month</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Average Transaction</div>
+                        <div class="kpi-value">₹36,5K</div>
+                        <div class="kpi-change"><i class="fas fa-arrow-down"></i> -5% vs last month</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-label">Success Rate</div>
+                        <div class="kpi-value">97.8%</div>
+                        <div class="kpi-change"><i class="fas fa-arrow-up"></i> +2% vs last month</div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-row">
+                    <div class="chart-card">
+                        <div class="chart-title">Revenue Trend (Last 7 Days)</div>
+                        <div class="chart-container">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">Payment Method Distribution</div>
+                        <div class="chart-container">
+                            <canvas id="paymentMethodChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transactions Table -->
+                <div class="transactions-card">
+                    <div class="controls">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Search transactions...">
+                        </div>
+                        <select class="filter-select">
+                            <option value="">All Status</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Failed">Failed</option>
+                            <option value="Refunded">Refunded</option>
+                        </select>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Transaction ID</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>TXN-001324</td>
+                                <td>John Doe</td>
+                                <td>₹75,000</td>
+                                <td>Razorpay</td>
+                                <td><span class="status-badge status-completed">Completed</span></td>
+                                <td>2024-03-15</td>
+                                <td><button class="btn-small">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>TXN-001323</td>
+                                <td>Jane Smith</td>
+                                <td>₹35,000</td>
+                                <td>Razorpay</td>
+                                <td><span class="status-badge status-completed">Completed</span></td>
+                                <td>2024-03-14</td>
+                                <td><button class="btn-small">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>TXN-001322</td>
+                                <td>Mike Johnson</td>
+                                <td>₹50,000</td>
+                                <td>Razorpay</td>
+                                <td><span class="status-badge status-pending">Pending</span></td>
+                                <td>2024-03-13</td>
+                                <td><button class="btn-small">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>TXN-001321</td>
+                                <td>Sarah Williams</td>
+                                <td>₹25,000</td>
+                                <td>Razorpay</td>
+                                <td><span class="status-badge status-failed">Failed</span></td>
+                                <td>2024-03-12</td>
+                                <td><button class="btn-small">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>TXN-001320</td>
+                                <td>Alex Brown</td>
+                                <td>₹100,000</td>
+                                <td>Razorpay</td>
+                                <td><span class="status-badge status-refunded">Refunded</span></td>
+                                <td>2024-03-11</td>
+                                <td><button class="btn-small">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>TXN-001319</td>
+                                <td>Emma Davis</td>
+                                <td>₹60,000</td>
+                                <td>Razorpay</td>
+                                <td><span class="status-badge status-completed">Completed</span></td>
+                                <td>2024-03-10</td>
+                                <td><button class="btn-small">View</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Revenue Chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Revenue (₹)',
+                    data: [150000, 180000, 165000, 220000, 195000, 210000, 185000],
+                    borderColor: '#ff6b35',
+                    backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#ff6b35',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#3a5f6f' },
+                        ticks: { color: '#a0a0a0' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#a0a0a0' }
+                    }
+                }
+            }
+        });
+
+        // Payment Method Chart
+        const methodCtx = document.getElementById('paymentMethodChart').getContext('2d');
+        new Chart(methodCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Razorpay', 'Stripe', 'Bank Transfer', 'Wallet'],
+                datasets: [{
+                    data: [60, 25, 10, 5],
+                    backgroundColor: [
+                        '#ff6b35',
+                        '#4ecdc4',
+                        '#667eea',
+                        '#f093fb'
+                    ],
+                    borderColor: '#2a3f4f',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#a0a0a0' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
